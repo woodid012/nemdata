@@ -2,7 +2,7 @@ name: Update NEM Data
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs at 00:00 UTC daily
+    - cron: '0 16 * * *'  # Runs at 3 AM AEST (UTC+10)
   workflow_dispatch:      # Allows manual trigger
 
 jobs:
@@ -17,12 +17,19 @@ jobs:
       with:
         python-version: '3.9'
     
+    - name: Install certificates
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ca-certificates
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pandas pymongo requests
+        pip install "pymongo[srv]>=4.3.3"
+        pip install pandas requests
     
     - name: Run update script
       env:
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        SSL_CERT_DIR: /etc/ssl/certs
       run: python update_nem_data.py
